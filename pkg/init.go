@@ -8,6 +8,9 @@ import (
 	"strconv"
 
 	klog "k8s.io/klog/v2"
+
+	interfaces "github.com/dvonthenen/rabbitmq-patterns/pkg/interfaces"
+	manager "github.com/dvonthenen/rabbitmq-patterns/pkg/manager"
 )
 
 type LogLevel int64
@@ -39,4 +42,18 @@ func Init(init RabbitInit) {
 		flag.Set("log_file", init.DebugFilePath)
 	}
 	flag.Parse()
+}
+
+func New(options interfaces.ManagerOptions) (*interfaces.Manager, error) {
+	manager, err := manager.New(manager.ManagerOptions{
+		&options,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var mgrInterface interfaces.Manager
+	mgrInterface = manager
+
+	return &mgrInterface, nil
 }
