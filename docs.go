@@ -1,4 +1,4 @@
-// Copyright 2022 Symbl.ai SDK contributors. All Rights Reserved.
+// Copyright 2022. All Rights Reserved.
 // SPDX-License-Identifier: MIT
 
 /*

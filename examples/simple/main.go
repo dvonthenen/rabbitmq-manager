@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"time"
@@ -33,7 +32,6 @@ func main() {
 	publisher, err := (*manager).CreatePublisher(interfaces.PublisherOptions{
 		Name:        "testing",
 		Type:        interfaces.ExchangeTypeFanout,
-		Durable:     true,
 		AutoDeleted: true,
 	})
 	if err != nil {
@@ -57,7 +55,6 @@ func main() {
 	subscriber, err := (*manager).CreateSubscriber(interfaces.SubscriberOptions{
 		Name:        "testing",
 		Type:        interfaces.ExchangeTypeFanout,
-		Durable:     true,
 		AutoDeleted: true,
 		NoAck:       true,
 		Handler:     &myHandler,
@@ -73,14 +70,33 @@ func main() {
 		os.Exit(1)
 	}
 
-	go func() {
-		for {
-			time.Sleep(3 * time.Second)
-			(*publisher).SendMessage([]byte("hello"))
-		}
-	}()
+	// send message
+	for i := 0; i < 3; i++ {
+		time.Sleep(3 * time.Second)
+		(*publisher).SendMessage([]byte("hello"))
+	}
 
-	fmt.Print("Press ENTER to exit!\n\n")
-	input := bufio.NewScanner(os.Stdin)
-	input.Scan()
+	// wait for last message to get processed
+	time.Sleep(3 * time.Second)
+
+	// restart test
+	err = (*manager).Retry()
+	if err != nil {
+		fmt.Printf("manager.Retry failed. Err: %v\n", err)
+	}
+
+	// send message again
+	for i := 0; i < 3; i++ {
+		time.Sleep(3 * time.Second)
+		(*publisher).SendMessage([]byte("hello"))
+	}
+
+	// wait for last message to get processed
+	time.Sleep(3 * time.Second)
+
+	// teardown
+	err = (*manager).Teardown()
+	if err != nil {
+		fmt.Printf("manager.Teardown failed. Err: %v\n", err)
+	}
 }

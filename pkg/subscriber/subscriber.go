@@ -19,6 +19,10 @@ func New(options SubscriberOptions) *Subscriber {
 	return rabbit
 }
 
+func (s *Subscriber) GetName() string {
+	return s.options.Name
+}
+
 func (s *Subscriber) Init() error {
 	klog.V(6).Infof("Subscriber.Init ENTER\n")
 
@@ -89,6 +93,7 @@ func (s *Subscriber) Init() error {
 
 	klog.V(3).Infof("Subscriber.Init Running message loop...\n")
 	s.running = true
+	s.stopChan = make(chan struct{})
 	go func() {
 		for {
 			select {
@@ -114,13 +119,50 @@ func (s *Subscriber) Init() error {
 	return nil
 }
 
-func (s *Subscriber) Teardown() error {
-	klog.V(6).Infof("Subscriber.Teardown ENTER\n")
+func (s *Subscriber) Retry() error {
+	// teardown but keep the channel
+	err := s.teardownMinusChannel()
+	if err != nil {
+		return err
+	}
 
+	// re-init
+	return s.Init()
+}
+
+func (s *Subscriber) teardownMinusChannel() error {
 	s.running = false
 
 	close(s.stopChan)
 	<-s.stopChan
+
+	// clean up queue related stuff
+	if s.queue != nil {
+		err := s.channel.QueueUnbind(s.queue.Name, "", s.options.Name, nil)
+		if err != nil {
+			klog.V(1).Infof("QueueUnbind failed. Err: %v\n", err)
+		}
+
+		_, err = s.channel.QueueDelete(s.queue.Name, false, false, true)
+		if err != nil {
+			klog.V(1).Infof("QueueDelete failed. Err: %v\n", err)
+		}
+		s.queue = nil
+	}
+
+	// clean up exchange
+	_ = s.channel.ExchangeDelete(s.options.Name, false, true)
+
+	return nil
+}
+
+func (s *Subscriber) Teardown() error {
+	klog.V(6).Infof("Subscriber.Teardown ENTER\n")
+
+	err := s.teardownMinusChannel()
+	if err != nil {
+		return err
+	}
 
 	if s.channel != nil {
 		s.channel.Close()
