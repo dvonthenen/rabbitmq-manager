@@ -148,21 +148,21 @@ func (m *Manager) GetSubscriberByName(name string) (*interfaces.Subscriber, erro
 	return &subInterface, nil
 }
 
-func (m *Manager) Start() error {
-	klog.V(6).Infof("Manager.Start ENTER\n")
+func (m *Manager) Init() error {
+	klog.V(6).Infof("Manager.Init ENTER\n")
 
 	for msgType, subscriber := range m.subscribers {
 		err := subscriber.Init()
 		if err == nil {
-			klog.V(3).Infof("subscriber.Start(%s) Succeeded\n", msgType)
+			klog.V(3).Infof("subscriber.Init %s Succeeded\n", msgType)
 		} else {
-			klog.V(1).Infof("subscriber.Start() failed. Err: %v\n", err)
-			klog.V(6).Infof("Manager.Start LEAVE\n")
+			klog.V(1).Infof("subscriber.Init %s failed. Err: %v\n", msgType, err)
+			klog.V(6).Infof("Manager.Init LEAVE\n")
 		}
 	}
 
-	klog.V(4).Infof("Manager.Start Succeeded\n")
-	klog.V(6).Infof("Manager.Start LEAVE\n")
+	klog.V(4).Infof("Manager.Init Succeeded\n")
+	klog.V(6).Infof("Manager.Init LEAVE\n")
 
 	return nil
 }

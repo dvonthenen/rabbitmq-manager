@@ -63,6 +63,7 @@ type RabbitMessageHandler interface {
 	for a given instance
 */
 type Manager interface {
+	Init() error
 	Retry() error
 	CreatePublisher(options PublisherOptions) (*Publisher, error)
 	CreateSubscriber(options SubscriberOptions) (*Subscriber, error)
