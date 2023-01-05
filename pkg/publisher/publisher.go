@@ -81,7 +81,7 @@ func (p *Publisher) SendMessage(data []byte) error {
 
 func (p *Publisher) teardownMinusChannel() error {
 	// clean up exchange
-	_ = p.channel.ExchangeDelete(p.options.Name, false, true)
+	_ = p.channel.ExchangeDelete(p.options.Name, p.options.IfUnused, p.options.NoWait)
 
 	return nil
 }
