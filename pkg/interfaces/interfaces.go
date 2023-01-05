@@ -36,13 +36,17 @@ type SubscriberOptions struct {
 	Object interfaces
 */
 type Publisher interface {
+	GetName() string
 	Init() error
+	Retry() error
 	SendMessage([]byte) error
 	Teardown() error
 }
 
 type Subscriber interface {
+	GetName() string
 	Init() error
+	Retry() error
 	Teardown() error
 }
 
@@ -59,9 +63,13 @@ type RabbitMessageHandler interface {
 	for a given instance
 */
 type Manager interface {
+	Retry() error
 	CreatePublisher(options PublisherOptions) (*Publisher, error)
 	CreateSubscriber(options SubscriberOptions) (*Subscriber, error)
+	GetPublisherByName(name string) (*Publisher, error)
+	GetSubscriberByName(name string) (*Subscriber, error)
 	PublishMessageByName(name string, data []byte) error
 	DeletePublisher(name string) error
 	DeleteSubscriber(name string) error
+	Teardown() error
 }

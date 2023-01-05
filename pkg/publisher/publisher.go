@@ -20,6 +20,10 @@ func New(options PublisherOptions) *Publisher {
 	return rabbit
 }
 
+func (p *Publisher) GetName() string {
+	return p.options.Name
+}
+
 func (p *Publisher) Init() error {
 	klog.V(6).Infof("Publisher.Init ENTER\n")
 
@@ -42,6 +46,10 @@ func (p *Publisher) Init() error {
 	klog.V(6).Infof("Publisher.Init LEAVE\n")
 
 	return nil
+}
+
+func (p *Publisher) Retry() error {
+	return p.Init()
 }
 
 func (p *Publisher) SendMessage(data []byte) error {
@@ -71,8 +79,20 @@ func (p *Publisher) SendMessage(data []byte) error {
 	return nil
 }
 
+func (p *Publisher) teardownMinusChannel() error {
+	// clean up exchange
+	_ = p.channel.ExchangeDelete(p.options.Name, false, true)
+
+	return nil
+}
+
 func (p *Publisher) Teardown() error {
 	klog.V(6).Infof("Publisher.Teardown ENTER\n")
+
+	err := p.teardownMinusChannel()
+	if err != nil {
+		return err
+	}
 
 	if p.channel != nil {
 		p.channel.Close()

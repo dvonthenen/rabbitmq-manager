@@ -1,2 +1,3 @@
-# rabbitmq-patterns
-Library for Common RabbitMQ Messaging Patterns
+# rabbitmq-manager
+
+Library for RabbitMQ Messaging Manager

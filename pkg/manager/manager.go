@@ -29,6 +29,26 @@ func New(options ManagerOptions) (*Manager, error) {
 	return rabbit, nil
 }
 
+func (m *Manager) Retry() error {
+	for _, publisher := range m.publishers {
+		err := publisher.Retry()
+		if err != nil {
+			klog.V(1).Infof("publisher.Retry %s not found\n", publisher.GetName())
+			return err
+		}
+	}
+
+	for _, subscriber := range m.subscribers {
+		err := subscriber.Retry()
+		if err != nil {
+			klog.V(1).Infof("subscriber.Retry %s not found\n", subscriber.GetName())
+			return err
+		}
+	}
+
+	return nil
+}
+
 func (m *Manager) CreatePublisher(options interfaces.PublisherOptions) (*interfaces.Publisher, error) {
 	klog.V(6).Infof("Manager.CreatePublisher ENTER\n")
 
@@ -92,6 +112,38 @@ func (m *Manager) CreateSubscriber(options interfaces.SubscriberOptions) (*inter
 
 	klog.V(4).Infof("Manager.CreateSubscriber(%s) Succeeded\n", options.Name)
 	klog.V(6).Infof("Manager.CreateSubscriber LEAVE\n")
+
+	return &subInterface, nil
+}
+
+func (m *Manager) GetPublisherByName(name string) (*interfaces.Publisher, error) {
+	if m.publishers == nil {
+		return nil, ErrPublisherNotFound
+	}
+
+	publisher := m.publishers[name]
+	if publisher == nil {
+		return nil, ErrPublisherNotFound
+	}
+
+	var pubInterface interfaces.Publisher
+	pubInterface = publisher
+
+	return &pubInterface, nil
+}
+
+func (m *Manager) GetSubscriberByName(name string) (*interfaces.Subscriber, error) {
+	if m.subscribers == nil {
+		return nil, ErrSubscriberNotFound
+	}
+
+	subscriber := m.subscribers[name]
+	if subscriber == nil {
+		return nil, ErrSubscriberNotFound
+	}
+
+	var subInterface interfaces.Subscriber
+	subInterface = subscriber
 
 	return &subInterface, nil
 }
