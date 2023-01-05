@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	rabbit "github.com/dvonthenen/rabbitmq-patterns/pkg"
-	interfaces "github.com/dvonthenen/rabbitmq-patterns/pkg/interfaces"
+	rabbit "github.com/dvonthenen/rabbitmq-manager/pkg"
+	interfaces "github.com/dvonthenen/rabbitmq-manager/pkg/interfaces"
 )
 
 type MyHandler struct{}

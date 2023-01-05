@@ -5,10 +5,10 @@
 Package provides reference implementation for Go to handle streaming
 audio generically from CPaaS platforms.
 
-GitHub repo: https://github.com/dvonthenen/rabbitmq-patterns
+GitHub repo: https://github.com/dvonthenen/rabbitmq-manager
 */
 package sdk
 
 import (
-	_ "github.com/dvonthenen/rabbitmq-patterns/pkg"
+	_ "github.com/dvonthenen/rabbitmq-manager/pkg"
 )

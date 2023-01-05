@@ -6,7 +6,7 @@ labels: kind/bug, triage/needs-triage
 assignees: ''
 
 ---
-<!-- Before creating a new issue please search for any existing related [issues](https://github.com/dvonthenen/rabbitmq-patterns/issues) before creating a new one. If you find an issue, join the discussion or add an emoji or comment with your scenario or subscribe to follow updates. -->
+<!-- Before creating a new issue please search for any existing related [issues](https://github.com/dvonthenen/rabbitmq-manager/issues) before creating a new one. If you find an issue, join the discussion or add an emoji or comment with your scenario or subscribe to follow updates. -->
 
 ## Bug Report
 

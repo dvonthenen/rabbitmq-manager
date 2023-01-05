@@ -9,8 +9,8 @@ import (
 
 	klog "k8s.io/klog/v2"
 
-	interfaces "github.com/dvonthenen/rabbitmq-patterns/pkg/interfaces"
-	manager "github.com/dvonthenen/rabbitmq-patterns/pkg/manager"
+	interfaces "github.com/dvonthenen/rabbitmq-manager/pkg/interfaces"
+	manager "github.com/dvonthenen/rabbitmq-manager/pkg/manager"
 )
 
 type LogLevel int64

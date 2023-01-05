@@ -6,7 +6,7 @@ package subscriber
 import (
 	klog "k8s.io/klog/v2"
 
-	common "github.com/dvonthenen/rabbitmq-patterns/pkg/common"
+	common "github.com/dvonthenen/rabbitmq-manager/pkg/common"
 )
 
 func New(options SubscriberOptions) *Subscriber {

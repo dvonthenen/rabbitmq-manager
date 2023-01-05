@@ -1,4 +1,4 @@
-module github.com/dvonthenen/rabbitmq-patterns
+module github.com/dvonthenen/rabbitmq-manager
 
 go 1.18
 
