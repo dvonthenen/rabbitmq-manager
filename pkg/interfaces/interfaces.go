@@ -11,25 +11,40 @@ type ManagerOptions struct {
 }
 
 type PublisherOptions struct {
-	Name        string
-	Type        ExchangeType
+	Name string
+	Type ExchangeType
+
+	// init
 	Durable     bool
 	AutoDeleted bool
 	Internal    bool
-	NoWait      bool
+
+	// teardown
+	IfUnused bool
+
+	// common
+	NoWait bool
 }
 
 type SubscriberOptions struct {
-	Name        string
-	Type        ExchangeType
+	Name    string
+	Type    ExchangeType
+	Handler *RabbitMessageHandler
+
+	// init
 	Durable     bool
 	AutoDeleted bool
 	Internal    bool
 	Exclusive   bool
-	NoWait      bool
 	NoLocal     bool
 	NoAck       bool
-	Handler     *RabbitMessageHandler
+
+	// teardown
+	IfUnused bool
+	IfEmpty  bool
+
+	// common
+	NoWait bool
 }
 
 /*

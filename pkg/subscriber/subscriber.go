@@ -143,7 +143,7 @@ func (s *Subscriber) teardownMinusChannel() error {
 			klog.V(1).Infof("QueueUnbind failed. Err: %v\n", err)
 		}
 
-		_, err = s.channel.QueueDelete(s.queue.Name, false, false, true)
+		_, err = s.channel.QueueDelete(s.queue.Name, s.options.IfUnused, s.options.IfEmpty, s.options.NoWait)
 		if err != nil {
 			klog.V(1).Infof("QueueDelete failed. Err: %v\n", err)
 		}
@@ -151,7 +151,7 @@ func (s *Subscriber) teardownMinusChannel() error {
 	}
 
 	// clean up exchange
-	_ = s.channel.ExchangeDelete(s.options.Name, false, true)
+	_ = s.channel.ExchangeDelete(s.options.Name, s.options.IfUnused, s.options.NoWait)
 
 	return nil
 }
