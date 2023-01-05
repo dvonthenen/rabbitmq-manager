@@ -52,7 +52,7 @@ func main() {
 	var myHandler interfaces.RabbitMessageHandler
 	myHandler = thisHandler
 
-	subscriber, err := (*manager).CreateSubscriber(interfaces.SubscriberOptions{
+	_, err = (*manager).CreateSubscriber(interfaces.SubscriberOptions{
 		Name:        "testing",
 		Type:        interfaces.ExchangeTypeFanout,
 		AutoDeleted: true,
@@ -64,9 +64,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = (*subscriber).Init()
+	err = (*manager).Init()
 	if err != nil {
-		fmt.Printf("subscriber.Init failed. Err: %v\n", err)
+		fmt.Printf("manager.Init failed. Err: %v\n", err)
 		os.Exit(1)
 	}
 
