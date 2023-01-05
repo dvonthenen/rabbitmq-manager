@@ -6,7 +6,7 @@ package publisher
 import (
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	interfaces "github.com/dvonthenen/rabbitmq-patterns/pkg/interfaces"
+	interfaces "github.com/dvonthenen/rabbitmq-manager/pkg/interfaces"
 )
 
 type PublisherOptions struct {

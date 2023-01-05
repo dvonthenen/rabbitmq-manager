@@ -8,9 +8,9 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	interfaces "github.com/dvonthenen/rabbitmq-patterns/pkg/interfaces"
-	publisher "github.com/dvonthenen/rabbitmq-patterns/pkg/publisher"
-	subscriber "github.com/dvonthenen/rabbitmq-patterns/pkg/subscriber"
+	interfaces "github.com/dvonthenen/rabbitmq-manager/pkg/interfaces"
+	publisher "github.com/dvonthenen/rabbitmq-manager/pkg/publisher"
+	subscriber "github.com/dvonthenen/rabbitmq-manager/pkg/subscriber"
 )
 
 func New(options ManagerOptions) (*Manager, error) {

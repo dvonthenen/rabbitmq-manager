@@ -4,7 +4,7 @@
 package common
 
 import (
-	interfaces "github.com/dvonthenen/rabbitmq-patterns/pkg/interfaces"
+	interfaces "github.com/dvonthenen/rabbitmq-manager/pkg/interfaces"
 )
 
 func ExchangeTypeToString(exchangeType interfaces.ExchangeType) string {
