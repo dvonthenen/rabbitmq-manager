@@ -151,6 +151,17 @@ func (m *Manager) GetSubscriberByName(name string) (*interfaces.Subscriber, erro
 func (m *Manager) Init() error {
 	klog.V(6).Infof("Manager.Init ENTER\n")
 
+	for msgType, publisher := range m.publishers {
+		err := publisher.Init()
+		if err == nil {
+			klog.V(3).Infof("publisher.Init %s Succeeded\n", msgType)
+		} else {
+			klog.V(1).Infof("publisher.Init %s failed. Err: %v\n", msgType, err)
+			klog.V(6).Infof("Manager.Init LEAVE\n")
+			return err
+		}
+	}
+
 	for msgType, subscriber := range m.subscribers {
 		err := subscriber.Init()
 		if err == nil {
@@ -158,6 +169,7 @@ func (m *Manager) Init() error {
 		} else {
 			klog.V(1).Infof("subscriber.Init %s failed. Err: %v\n", msgType, err)
 			klog.V(6).Infof("Manager.Init LEAVE\n")
+			return err
 		}
 	}
 

@@ -39,12 +39,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	err = (*publisher).Init()
-	if err != nil {
-		fmt.Printf("publisher.Init failed. Err: %v\n", err)
-		os.Exit(1)
-	}
-
 	// object
 	thisHandler := MyHandler{}
 
