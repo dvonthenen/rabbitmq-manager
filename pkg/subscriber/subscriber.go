@@ -32,7 +32,7 @@ func (s *Subscriber) Init() error {
 		return nil
 	}
 
-	klog.V(3).Infof("ExchangeDeclare: %n\n", s.options.Name)
+	klog.V(3).Infof("ExchangeDeclare: %s\n", s.options.Name)
 	err := s.channel.ExchangeDeclare(
 		s.options.Name, // name
 		common.ExchangeTypeToString(s.options.Type), // type
@@ -43,7 +43,7 @@ func (s *Subscriber) Init() error {
 		nil,                   // arguments
 	)
 	if err != nil {
-		klog.V(1).Infof("ExchangeDeclare(%s) failed. Err: %v\n", s.options.Name, err)
+		klog.V(1).Infof("ExchangeDeclare %s failed. Err: %v\n", s.options.Name, err)
 		klog.V(6).Infof("Subscriber.Init LEAVE\n")
 		return err
 	}
@@ -63,7 +63,7 @@ func (s *Subscriber) Init() error {
 	}
 	s.queue = &q
 
-	klog.V(3).Infof("QueueBind: %n\n", s.options.Name)
+	klog.V(3).Infof("QueueBind: %s\n", s.options.Name)
 	err = s.channel.QueueBind(
 		q.Name,         // queue name
 		"",             // routing key
