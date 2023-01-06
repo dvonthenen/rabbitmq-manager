@@ -32,7 +32,7 @@ func (s *Subscriber) Init() error {
 		return nil
 	}
 
-	klog.V(3).Infof("ExchangeDeclare: %s\n", s.options.Name)
+	klog.V(3).Infof("ExchangeDeclare: %s\n", s.GetName())
 	err := s.channel.ExchangeDeclare(
 		s.options.Name, // name
 		common.ExchangeTypeToString(s.options.Type), // type
@@ -48,6 +48,7 @@ func (s *Subscriber) Init() error {
 		return err
 	}
 
+	klog.V(3).Infof("QueueDeclare: %s\n", s.GetName())
 	q, err := s.channel.QueueDeclare(
 		"",                    // name
 		s.options.Durable,     // durable
@@ -57,13 +58,13 @@ func (s *Subscriber) Init() error {
 		nil,                   // arguments
 	)
 	if err != nil {
-		klog.V(1).Infof("QueueDeclare() failed. Err: %v\n", err)
+		klog.V(1).Infof("QueueDeclare %s failed. Err: %v\n", s.GetName(), err)
 		klog.V(6).Infof("Subscriber.Init LEAVE\n")
 		return err
 	}
 	s.queue = &q
 
-	klog.V(3).Infof("QueueBind: %s\n", s.options.Name)
+	klog.V(3).Infof("QueueBind: %s\n", s.GetName())
 	err = s.channel.QueueBind(
 		q.Name,         // queue name
 		"",             // routing key
@@ -71,11 +72,12 @@ func (s *Subscriber) Init() error {
 		false,
 		nil)
 	if err != nil {
-		klog.V(1).Infof("QueueBind() failed. Err: %v\n", err)
+		klog.V(1).Infof("QueueBind %s failed. Err: %v\n", s.GetName(), err)
 		klog.V(6).Infof("Subscriber.Init LEAVE\n")
 		return err
 	}
 
+	klog.V(3).Infof("Consume: %s\n", s.GetName())
 	msgs, err := s.channel.Consume(
 		s.queue.Name,        // queue
 		"",                  // consumer tag
@@ -86,7 +88,7 @@ func (s *Subscriber) Init() error {
 		nil,                 // args
 	)
 	if err != nil {
-		klog.V(1).Infof("Consume failed. Err: %v\n", err)
+		klog.V(1).Infof("Consume %s failed. Err: %v\n", s.GetName(), err)
 		klog.V(6).Infof("Subscriber.Init LEAVE\n")
 		return err
 	}
@@ -120,14 +122,31 @@ func (s *Subscriber) Init() error {
 }
 
 func (s *Subscriber) Retry() error {
+	klog.V(6).Infof("Subscriber.Retry ENTER\n")
+	klog.V(3).Infof("Subscriber.Retry %s called\n", s.GetName())
+
+	// attempt to clean up but continue
+	var retErr error
+	retErr = nil
+
 	// teardown but keep the channel
 	err := s.teardownMinusChannel()
 	if err != nil {
-		return err
+		klog.V(1).Infof("teardownMinusChannel failed. Err: %v\n", err)
+		retErr = err
 	}
 
 	// re-init
-	return s.Init()
+	err = s.Init()
+	if err == nil {
+		klog.V(4).Infof("Subscriber.Retry Succeeded\n")
+	} else {
+		klog.V(1).Infof("Subscriber.Retry failed. Err: %v\n", err)
+		retErr = err
+	}
+	klog.V(6).Infof("Subscriber.Retry LEAVE\n")
+
+	return retErr
 }
 
 func (s *Subscriber) teardownMinusChannel() error {
@@ -136,32 +155,46 @@ func (s *Subscriber) teardownMinusChannel() error {
 	close(s.stopChan)
 	<-s.stopChan
 
+	var retErr error
+	retErr = nil
+
 	// clean up queue related stuff
 	if s.queue != nil {
 		err := s.channel.QueueUnbind(s.queue.Name, "", s.options.Name, nil)
 		if err != nil {
-			klog.V(1).Infof("QueueUnbind failed. Err: %v\n", err)
+			klog.V(1).Infof("QueueUnbind %s failed. Err: %v\n", s.queue.Name, err)
+			retErr = err
 		}
 
 		_, err = s.channel.QueueDelete(s.queue.Name, s.options.IfUnused, s.options.IfEmpty, s.options.NoWait)
 		if err != nil {
-			klog.V(1).Infof("QueueDelete failed. Err: %v\n", err)
+			klog.V(1).Infof("QueueDelete %s failed. Err: %v\n", s.queue.Name, err)
+			retErr = err
 		}
 		s.queue = nil
 	}
 
 	// clean up exchange
-	_ = s.channel.ExchangeDelete(s.options.Name, s.options.IfUnused, s.options.NoWait)
+	err := s.channel.ExchangeDelete(s.options.Name, s.options.IfUnused, s.options.NoWait)
+	if err != nil {
+		klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", s.GetName(), err)
+		retErr = err
+	}
 
-	return nil
+	return retErr
 }
 
 func (s *Subscriber) Teardown() error {
 	klog.V(6).Infof("Subscriber.Teardown ENTER\n")
+	klog.V(3).Infof("Subscriber.Teardown %s called\n", s.GetName())
+
+	var retErr error
+	retErr = nil
 
 	err := s.teardownMinusChannel()
 	if err != nil {
-		return err
+		klog.V(1).Infof("teardownMinusChannel Failed. Err: %v\n", err)
+		retErr = err
 	}
 
 	if s.channel != nil {
@@ -169,8 +202,12 @@ func (s *Subscriber) Teardown() error {
 		s.channel = nil
 	}
 
-	klog.V(4).Infof("Subscriber.Teardown Succeeded\n")
+	if retErr == nil {
+		klog.V(4).Infof("Subscriber.Teardown Succeeded\n")
+	} else {
+		klog.V(1).Infof("Subscriber.Teardown failed. Err: %v\n", retErr)
+	}
 	klog.V(6).Infof("Subscriber.Teardown LEAVE\n")
 
-	return nil
+	return retErr
 }

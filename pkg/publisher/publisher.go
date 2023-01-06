@@ -27,6 +27,7 @@ func (p *Publisher) GetName() string {
 func (p *Publisher) Init() error {
 	klog.V(6).Infof("Publisher.Init ENTER\n")
 
+	klog.V(3).Infof("ExchangeDeclare: %s\n", p.GetName())
 	err := p.channel.ExchangeDeclare(
 		p.options.Name, // name
 		common.ExchangeTypeToString(p.options.Type), // type
@@ -49,16 +50,26 @@ func (p *Publisher) Init() error {
 }
 
 func (p *Publisher) Retry() error {
-	return p.Init()
+	klog.V(6).Infof("Publisher.Retry ENTER\n")
+	klog.V(3).Infof("Publisher.Retry %s called\n", p.GetName())
+
+	err := p.Init()
+	if err == nil {
+		klog.V(4).Infof("Publisher.Retry Succeeded\n")
+	} else {
+		klog.V(1).Infof("Publisher.Retry failed. Err: %v\n", err)
+	}
+	klog.V(6).Infof("Publisher.Retry LEAVE\n")
+
+	return err
 }
 
 func (p *Publisher) SendMessage(data []byte) error {
 	klog.V(6).Infof("Publisher.SendMessage ENTER\n")
+	klog.V(3).Infof("Publishing to: %s\n", p.options.Name)
+	klog.V(4).Infof("Data: %s\n", string(data))
 
 	ctx := context.Background()
-
-	klog.V(3).Infof("Publishing to: %s\n", p.options.Name)
-	klog.V(3).Infof("Data: %s\n", string(data))
 	err := p.channel.PublishWithContext(ctx,
 		p.options.Name, // exchange
 		"",             // routing key
@@ -70,10 +81,11 @@ func (p *Publisher) SendMessage(data []byte) error {
 		})
 	if err != nil {
 		klog.V(1).Infof("PublishWithContext failed. Err: %v\n", err)
+		klog.V(6).Infof("Publisher.SendMessage LEAVE\n")
 		return err
 	}
 
-	klog.V(3).Infof("Publisher.SendMessage succeeded\n%s\n", string(data))
+	klog.V(4).Infof("Publisher.SendMessage %s succeeded\n%s\n", p.GetName(), string(data))
 	klog.V(6).Infof("Publisher.SendMessage LEAVE\n")
 
 	return nil
@@ -81,17 +93,25 @@ func (p *Publisher) SendMessage(data []byte) error {
 
 func (p *Publisher) teardownMinusChannel() error {
 	// clean up exchange
-	_ = p.channel.ExchangeDelete(p.options.Name, p.options.IfUnused, p.options.NoWait)
+	err := p.channel.ExchangeDelete(p.options.Name, p.options.IfUnused, p.options.NoWait)
+	if err != nil {
+		klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", p.options.Name, err)
+	}
 
-	return nil
+	return err
 }
 
 func (p *Publisher) Teardown() error {
 	klog.V(6).Infof("Publisher.Teardown ENTER\n")
+	klog.V(3).Infof("Publisher.Teardown %s called\n", p.GetName())
+
+	var retErr error
+	retErr = nil
 
 	err := p.teardownMinusChannel()
 	if err != nil {
-		return err
+		klog.V(1).Infof("teardownMinusChannel Failed. Err: %v\n", err)
+		retErr = err
 	}
 
 	if p.channel != nil {
@@ -99,8 +119,12 @@ func (p *Publisher) Teardown() error {
 		p.channel = nil
 	}
 
-	klog.V(4).Infof("Publisher.Teardown Succeeded\n")
+	if retErr == nil {
+		klog.V(4).Infof("Publisher.Teardown Succeeded\n")
+	} else {
+		klog.V(1).Infof("Publisher.Teardown failed. Err: %v\n", retErr)
+	}
 	klog.V(6).Infof("Publisher.Teardown LEAVE\n")
 
-	return nil
+	return retErr
 }
