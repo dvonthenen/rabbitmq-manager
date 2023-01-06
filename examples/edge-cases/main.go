@@ -65,9 +65,27 @@ func main() {
 	}
 
 	// send message
-	(*publisher).SendMessage([]byte("hello"))
+	for i := 0; i < 3; i++ {
+		time.Sleep(3 * time.Second)
+		(*publisher).SendMessage([]byte("hello"))
+	}
 
-	// wait for message to get processed
+	// wait for last message to get processed
+	time.Sleep(3 * time.Second)
+
+	// restart test
+	err = (*manager).Retry()
+	if err != nil {
+		fmt.Printf("manager.Retry failed. Err: %v\n", err)
+	}
+
+	// send message again
+	for i := 0; i < 3; i++ {
+		time.Sleep(3 * time.Second)
+		(*publisher).SendMessage([]byte("hello"))
+	}
+
+	// wait for last message to get processed
 	time.Sleep(3 * time.Second)
 
 	// teardown
