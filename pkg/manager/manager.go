@@ -80,7 +80,7 @@ func (m *Manager) CreatePublisher(options interfaces.PublisherOptions) (*interfa
 	var pubInterface interfaces.Publisher
 	pubInterface = publisher
 
-	klog.V(4).Infof("Manager.CreatePublisher(%s) Succeeded\n", options.Name)
+	klog.V(4).Infof("Manager.CreatePublisher %s Succeeded\n", options.Name)
 	klog.V(6).Infof("Manager.CreatePublisher LEAVE\n")
 
 	return &pubInterface, nil
@@ -110,7 +110,7 @@ func (m *Manager) CreateSubscriber(options interfaces.SubscriberOptions) (*inter
 	var subInterface interfaces.Subscriber
 	subInterface = subscriber
 
-	klog.V(4).Infof("Manager.CreateSubscriber(%s) Succeeded\n", options.Name)
+	klog.V(4).Infof("Manager.CreateSubscriber %s Succeeded\n", options.Name)
 	klog.V(6).Infof("Manager.CreateSubscriber LEAVE\n")
 
 	return &subInterface, nil
