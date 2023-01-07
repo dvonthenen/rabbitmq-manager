@@ -92,13 +92,27 @@ func (p *Publisher) SendMessage(data []byte) error {
 }
 
 func (p *Publisher) teardownMinusChannel() error {
+	var retErr error
+	retErr = nil
+
 	// clean up exchange
 	err := p.channel.ExchangeDelete(p.options.Name, p.options.IfUnused, p.options.NoWait)
 	if err != nil {
-		klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", p.options.Name, err)
+		publishError, ok := err.(*amqp.Error)
+		if ok {
+			if publishError.Code != 504 && publishError.Code != 406 {
+				klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", p.GetName(), err)
+				retErr = err
+			} else if p.options.DeleteWarnings {
+				klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", p.GetName(), err)
+				retErr = err
+			}
+		} else {
+			retErr = common.ErrUnresolvedRabbitError
+		}
 	}
 
-	return err
+	return retErr
 }
 
 func (p *Publisher) Teardown() error {

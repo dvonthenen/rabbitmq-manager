@@ -7,7 +7,8 @@ package interfaces
 	Configuration Options for Rabbit Subscriber/Publisher
 */
 type ManagerOptions struct {
-	RabbitURI string
+	RabbitURI      string
+	DeleteWarnings bool
 }
 
 type PublisherOptions struct {
@@ -20,7 +21,8 @@ type PublisherOptions struct {
 	Internal    bool
 
 	// teardown
-	IfUnused bool
+	IfUnused       bool
+	DeleteWarnings bool
 
 	// common
 	NoWait bool
@@ -40,8 +42,9 @@ type SubscriberOptions struct {
 	NoAck       bool
 
 	// teardown
-	IfUnused bool
-	IfEmpty  bool
+	IfUnused       bool
+	IfEmpty        bool
+	DeleteWarnings bool
 
 	// common
 	NoWait bool

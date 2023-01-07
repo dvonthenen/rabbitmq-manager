@@ -4,6 +4,7 @@
 package subscriber
 
 import (
+	amqp "github.com/rabbitmq/amqp091-go"
 	klog "k8s.io/klog/v2"
 
 	common "github.com/dvonthenen/rabbitmq-manager/pkg/common"
@@ -168,8 +169,18 @@ func (s *Subscriber) teardownMinusChannel() error {
 
 		_, err = s.channel.QueueDelete(s.queue.Name, s.options.IfUnused, s.options.IfEmpty, s.options.NoWait)
 		if err != nil {
-			klog.V(1).Infof("QueueDelete %s failed. Err: %v\n", s.queue.Name, err)
-			retErr = err
+			publishError, ok := err.(*amqp.Error)
+			if ok {
+				if publishError.Code != 504 && publishError.Code != 406 {
+					klog.V(1).Infof("QueueDelete %s failed. Err: %v\n", s.queue.Name, err)
+					retErr = err
+				} else if s.options.DeleteWarnings {
+					klog.V(1).Infof("QueueDelete %s failed. Err: %v\n", s.queue.Name, err)
+					retErr = err
+				}
+			} else {
+				retErr = common.ErrUnresolvedRabbitError
+			}
 		}
 		s.queue = nil
 	}
@@ -177,8 +188,18 @@ func (s *Subscriber) teardownMinusChannel() error {
 	// clean up exchange
 	err := s.channel.ExchangeDelete(s.options.Name, s.options.IfUnused, s.options.NoWait)
 	if err != nil {
-		klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", s.GetName(), err)
-		retErr = err
+		publishError, ok := err.(*amqp.Error)
+		if ok {
+			if publishError.Code != 504 && publishError.Code != 406 {
+				klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", s.GetName(), err)
+				retErr = err
+			} else if s.options.DeleteWarnings {
+				klog.V(1).Infof("ExchangeDelete %s failed. Err: %v\n", s.GetName(), err)
+				retErr = err
+			}
+		} else {
+			retErr = common.ErrUnresolvedRabbitError
+		}
 	}
 
 	return retErr
