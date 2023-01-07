@@ -3,6 +3,8 @@
 
 package common
 
+import "errors"
+
 /*
 	Message Exchange Types
 */
@@ -11,4 +13,9 @@ const (
 	ExchangeFanout  = "fanout"
 	ExchangeTopic   = "topic"
 	ExchangeHeaders = "headers"
+)
+
+var (
+	// ErrUnresolvedRabbitError unresolvable rabbit error
+	ErrUnresolvedRabbitError = errors.New("unresolvable rabbit error")
 )

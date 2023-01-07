@@ -22,6 +22,7 @@ func New(options ManagerOptions) (*Manager, error) {
 	}
 
 	rabbit := &Manager{
+		options:     options,
 		subscribers: make(map[string]*subscriber.Subscriber),
 		publishers:  make(map[string]*publisher.Publisher),
 		connection:  conn,
@@ -73,6 +74,9 @@ func (m *Manager) CreatePublisher(options interfaces.PublisherOptions) (*interfa
 	}
 
 	// setup publisher
+	if m.options.DeleteWarnings {
+		options.DeleteWarnings = true
+	}
 	publisherOptions := publisher.PublisherOptions{
 		&options,
 		ch,
@@ -110,6 +114,9 @@ func (m *Manager) CreateSubscriber(options interfaces.SubscriberOptions) (*inter
 	}
 
 	// setup subscriber
+	if m.options.DeleteWarnings {
+		options.DeleteWarnings = true
+	}
 	subscriberOptions := subscriber.SubscriberOptions{
 		&options,
 		ch,

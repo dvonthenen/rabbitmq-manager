@@ -18,11 +18,12 @@ func (my MyHandler) ProcessMessage(byData []byte) error {
 
 func main() {
 	rabbit.Init(rabbit.RabbitInit{
-		LogLevel: rabbit.LogLevelStandard,
+		LogLevel: rabbit.LogLevelStandard, // LogLevelStandard / LogLevelTrace
 	})
 
 	manager, err := rabbit.New(interfaces.ManagerOptions{
 		RabbitURI: "amqp://guest:guest@localhost:5672/",
+		// DeleteWarnings: true,
 	})
 	if err != nil {
 		fmt.Printf("rabbit.New failed. Err: %v\n", err)
@@ -33,6 +34,7 @@ func main() {
 		Name:        "testing",
 		Type:        interfaces.ExchangeTypeFanout,
 		AutoDeleted: true,
+		IfUnused:    true,
 	})
 	if err != nil {
 		fmt.Printf("CreatePublisher failed. Err: %v\n", err)
@@ -50,7 +52,7 @@ func main() {
 		Name:        "testing",
 		Type:        interfaces.ExchangeTypeFanout,
 		AutoDeleted: true,
-		NoAck:       true,
+		IfUnused:    true,
 		Handler:     &myHandler,
 	})
 	if err != nil {
